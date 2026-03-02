@@ -1,0 +1,20 @@
+# IDE
+.idea/
+
+# Delphi build artifacts
+Win32/
+__recovery/
+*.dcu
+*.o
+*.ppu
+*.exe
+*.res
+*.dproj.local
+
+# FPC Linux binaries (no extension)
+calendar_puzzle
+test_puzzle
+
+# Java (not part of this project)
+*.class
+*.java
