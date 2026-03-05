@@ -32,11 +32,11 @@ const
   ANSI_RESET     = #27'[0m';
 
 type
-  TBoardPosition = record        // (0,0)
+  TBoardPosition = record
     Row, Col: Integer;
   end;
-  TPieceShape = array of TBoardPosition;     // [(0,0), ...]
-  TPieceOrientations = array of TPieceShape;          // [[(0,0), ...], [(0,1), ...], ...]
+  TPieceShape = array of TBoardPosition;
+  TPieceOrientations = array of TPieceShape;
 
   TPlacement = record
     PieceNumber: Integer;
@@ -51,7 +51,6 @@ var
   TodayMonth, TodayDay: Word;
   MonthTargetRow, MonthTargetCol, DayTargetRow, DayTargetCol: Integer;
 
-  // For each board cell: list of placements whose first shape cell lands here
   CellPlacements: array[0..BOARD_SIZE-1, 0..BOARD_SIZE-1] of array of TPlacement;
   CellPlacementCount: array[0..BOARD_SIZE-1, 0..BOARD_SIZE-1] of Integer;
 
@@ -266,7 +265,6 @@ var
   Placement: TPlacement;
   Count: Integer;
 begin
-  // Reset placement lists and counts
   FillChar(CellPlacementCount, SizeOf(CellPlacementCount), 0);
   for AnchorRow := 0 to BOARD_SIZE - 1 do
     for AnchorCol := 0 to BOARD_SIZE - 1 do
@@ -280,7 +278,6 @@ begin
       for AnchorRow := 0 to BOARD_SIZE - 1 do
         for AnchorCol := 0 to BOARD_SIZE - 1 do
         begin
-          // Check all cells are in bounds and not wall/target
           Valid := True;
           Placement.PieceNumber := PieceNumber;
           Placement.CellCount := Length(CurrentShape);
@@ -307,11 +304,9 @@ begin
 
           if not Valid then Continue;
 
-          // The first cell of the shape (in scan order) determines the index
           FirstRow := AnchorRow + CurrentShape[0].Row;
           FirstCol := AnchorCol + CurrentShape[0].Col;
 
-          // Append to that cell's placement list
           Count := CellPlacementCount[FirstRow, FirstCol];
           if Count >= Length(CellPlacements[FirstRow, FirstCol]) then
             SetLength(CellPlacements[FirstRow, FirstCol], Count + 16);
@@ -338,7 +333,6 @@ var
 var
   Row, Col, I, MinPieceSize: Integer;
 begin
-  // Find the smallest unplaced piece size
   MinPieceSize := 7;
   for I := 1 to TOTAL_PIECES do
     if not PieceIsPlaced[I] then
@@ -360,19 +354,16 @@ var
   P: TPlacement;
   CanPlace: Boolean;
 begin
-  // Find first empty cell (scan top-left to bottom-right)
   for Row := 0 to BOARD_SIZE - 1 do
     for Col := 0 to BOARD_SIZE - 1 do
     begin
       if PuzzleBoard[Row, Col] <> CELL_EMPTY then Continue;
 
-      // Try each precomputed placement whose first cell covers (Row, Col)
       for Index := 0 to CellPlacementCount[Row, Col] - 1 do
       begin
         P := CellPlacements[Row, Col][Index];
         if PieceIsPlaced[P.PieceNumber] then Continue;
 
-        // Check all cells are empty (bounds/walls already excluded at precompute time)
         CanPlace := True;
         for CellIndex := 0 to P.CellCount - 1 do
           if PuzzleBoard[P.Cells[CellIndex].Row, P.Cells[CellIndex].Col] <> CELL_EMPTY then
@@ -382,16 +373,13 @@ begin
           end;
         if not CanPlace then Continue;
 
-        // Place piece
         for CellIndex := 0 to P.CellCount - 1 do
           PuzzleBoard[P.Cells[CellIndex].Row, P.Cells[CellIndex].Col] := P.PieceNumber;
         PieceIsPlaced[P.PieceNumber] := True;
 
-        // Recurse (with dead-space pruning)
         if not HasDeadSpace then
           if SolveByBacktracking then Exit(True);
 
-        // Unplace piece
         for CellIndex := 0 to P.CellCount - 1 do
           PuzzleBoard[P.Cells[CellIndex].Row, P.Cells[CellIndex].Col] := CELL_EMPTY;
         PieceIsPlaced[P.PieceNumber] := False;
