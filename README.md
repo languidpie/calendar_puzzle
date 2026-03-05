@@ -49,6 +49,6 @@ Solved in 1 ms
 fpc test_puzzle.dpr && ./test_puzzle
 ```
 
-Runs 104 tests covering shape normalisation, rotation, mirroring,
+Runs 105 tests covering shape normalisation, rotation, mirroring,
 board setup for various dates, placement precomputation, dead-space
 detection, and full solves for five representative dates.

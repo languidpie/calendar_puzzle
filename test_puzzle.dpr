@@ -273,7 +273,7 @@ end;
 
 procedure TestHasDeadSpace;
 var
-  Row, Col: Integer;
+  Row, Col, I: Integer;
 begin
   WriteLn('--- HasDeadSpace ---');
 
@@ -310,6 +310,24 @@ begin
   PuzzleBoard[4, 3] := CELL_EMPTY;
   PuzzleBoard[4, 4] := CELL_EMPTY;
   Check(HasDeadSpace, '4-cell isolated region is dead space');
+
+  // 5-cell region with only 6-cell piece (piece 1) remaining -> dead space
+  SetupBoardForDate(1, 1);
+  for Row := 0 to BOARD_SIZE - 1 do
+    for Col := 0 to BOARD_SIZE - 1 do
+      if PuzzleBoard[Row, Col] = CELL_EMPTY then
+        PuzzleBoard[Row, Col] := 2;
+  for I := 2 to TOTAL_PIECES do
+    PieceIsPlaced[I] := True;
+  PieceIsPlaced[1] := False;
+  // Clear a 5-cell cross
+  PuzzleBoard[3, 3] := CELL_EMPTY;
+  PuzzleBoard[2, 3] := CELL_EMPTY;
+  PuzzleBoard[4, 3] := CELL_EMPTY;
+  PuzzleBoard[3, 2] := CELL_EMPTY;
+  PuzzleBoard[3, 4] := CELL_EMPTY;
+  Check(HasDeadSpace, '5-cell region with only 6-cell piece remaining is dead space');
+  FillChar(PieceIsPlaced, SizeOf(PieceIsPlaced), 0);
 end;
 
 procedure SolveAndVerifyDate(Month, Day: Word; const DateLabel: string);

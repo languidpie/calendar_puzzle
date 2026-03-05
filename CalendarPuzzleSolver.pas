@@ -1,4 +1,4 @@
-unit CalendarPuzzleSolver;
+﻿unit CalendarPuzzleSolver;
 
 {$IFDEF FPC}
 {$mode delphi}
@@ -32,11 +32,11 @@ const
   ANSI_RESET     = #27'[0m';
 
 type
-  TBoardPosition = record
+  TBoardPosition = record        // (0,0)
     Row, Col: Integer;
   end;
-  TPieceShape = array of TBoardPosition;
-  TPieceOrientations = array of TPieceShape;
+  TPieceShape = array of TBoardPosition;     // [(0,0), ...]
+  TPieceOrientations = array of TPieceShape;          // [[(0,0), ...], [(0,1), ...], ...]
 
   TPlacement = record
     PieceNumber: Integer;
@@ -72,10 +72,10 @@ implementation
 
 uses
   {$IFDEF FPC}
-  SysUtils
+  SysUtils, DateUtils
     {$IFDEF MSWINDOWS}, Windows{$ENDIF}
   {$ELSE}
-  System.SysUtils, Winapi.Windows
+  System.SysUtils, System.DateUtils, Winapi.Windows
   {$ENDIF};
 
 procedure SortPositionsRowMajor(var Positions: TPieceShape);
@@ -221,6 +221,11 @@ procedure SetupBoardForDate(Month, Day: Word);
 var
   Row, Col: Integer;
 begin
+  if (Month < 1) or (Month > 12) then
+    raise Exception.CreateFmt('Month must be 1..12, got %d', [Month]);
+  if (Day < 1) or (Day > 31) then
+    raise Exception.CreateFmt('Day must be 1..31, got %d', [Day]);
+
   for Row := 0 to BOARD_SIZE - 1 do
     for Col := 0 to BOARD_SIZE - 1 do
       PuzzleBoard[Row, Col] := CELL_EMPTY;
@@ -248,11 +253,8 @@ begin
 end;
 
 procedure SetupBoard;
-var
-  Year: Word;
 begin
-  DecodeDate(Now, Year, TodayMonth, TodayDay);
-  SetupBoardForDate(TodayMonth, TodayDay);
+  SetupBoardForDate(MonthOf(Now), DayOf(Now));
 end;
 
 procedure PrecomputePlacements;
@@ -264,8 +266,11 @@ var
   Placement: TPlacement;
   Count: Integer;
 begin
-  // Initialize counts to zero
+  // Reset placement lists and counts
   FillChar(CellPlacementCount, SizeOf(CellPlacementCount), 0);
+  for AnchorRow := 0 to BOARD_SIZE - 1 do
+    for AnchorCol := 0 to BOARD_SIZE - 1 do
+      SetLength(CellPlacements[AnchorRow, AnchorCol], 0);
 
   for PieceNumber := 1 to TOTAL_PIECES do
     for OrientationIndex := 0 to High(PieceOrientations[PieceNumber]) do
@@ -331,13 +336,20 @@ var
   end;
 
 var
-  Row, Col: Integer;
+  Row, Col, I, MinPieceSize: Integer;
 begin
+  // Find the smallest unplaced piece size
+  MinPieceSize := 7;
+  for I := 1 to TOTAL_PIECES do
+    if not PieceIsPlaced[I] then
+      if Length(PieceOrientations[I][0]) < MinPieceSize then
+        MinPieceSize := Length(PieceOrientations[I][0]);
+
   FillChar(Visited, SizeOf(Visited), 0);
   for Row := 0 to BOARD_SIZE - 1 do
     for Col := 0 to BOARD_SIZE - 1 do
       if (PuzzleBoard[Row, Col] = CELL_EMPTY) and not Visited[Row, Col] then
-        if FloodFillCount(Row, Col) < 5 then
+        if FloodFillCount(Row, Col) < MinPieceSize then
           Exit(True);
   Result := False;
 end;
