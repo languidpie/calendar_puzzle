@@ -52,9 +52,3 @@ fpc test_puzzle.dpr && ./test_puzzle
 Runs 104 tests covering shape normalisation, rotation, mirroring,
 board setup for various dates, placement precomputation, dead-space
 detection, and full solves for five representative dates.
-
-## Documentation
-
-- **HOW_IT_WORKS.pdf** -- explains the board layout, piece definitions,
-  and backtracking algorithm.
-- **WALKTHROUGH.pdf** -- step-by-step walkthrough of a solve.
