@@ -20,10 +20,11 @@ Open `calendar_puzzle.dproj` in the IDE and build normally.
 ## Running
 
 ```
-./calendar_puzzle
+./calendar_puzzle              # solve for today's date
+./calendar_puzzle 20260306     # solve for March 6, 2026
 ```
 
-Solves for today's date and prints the board:
+Solves for the given date (or today if omitted) and prints the board:
 
 ```
 Calendar Puzzle Solver

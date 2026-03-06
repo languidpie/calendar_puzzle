@@ -65,6 +65,7 @@ procedure SetupBoardForDate(Month, Day: Word);
 procedure PrecomputePlacements;
 function HasDeadSpace: Boolean;
 function SolveByBacktracking: Boolean;
+procedure RunPuzzleForDate(Month, Day: Word);
 procedure RunPuzzle;
 
 implementation
@@ -440,7 +441,7 @@ begin
 end;
 {$ENDIF}
 
-procedure RunPuzzle;
+procedure RunPuzzleForDate(Month, Day: Word);
 var
   StartTime, ElapsedMilliseconds: Int64;
 begin
@@ -452,7 +453,7 @@ begin
   WriteLn('=====================');
 
   DefinePieceShapes;
-  SetupBoard;
+  SetupBoardForDate(Month, Day);
   PrecomputePlacements;
 
   WriteLn(Format('Date: %s %d', [MONTH_NAMES[TodayMonth], TodayDay]));
@@ -470,6 +471,11 @@ begin
   end
   else
     WriteLn('No solution found!');
+end;
+
+procedure RunPuzzle;
+begin
+  RunPuzzleForDate(MonthOf(Now), DayOf(Now));
 end;
 
 end.
